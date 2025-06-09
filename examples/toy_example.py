@@ -1,4 +1,5 @@
-import os
+import os, sys
+sys.path.insert(0, os.path.abspath(os.path.join(os.path.dirname(__file__), '..')))
 from src.train import train_transformer
 from src.analysis import generate_smiles
 
