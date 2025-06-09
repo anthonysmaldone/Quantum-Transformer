@@ -1,0 +1,42 @@
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:cu11-latest --module=cuda-mpich /bin/bash
+
+cp -r /opt/nvidia/cudaq/distributed_interfaces/ .
+
+pip install rdkit==2024.9.4
+pip install torch==2.5.1+cu121 torchvision torchaudio --index-url https://download.pytorch.org/whl/cu121
+pip install pandas==2.2.2
+pip install torchdata==0.10.1
+pip install tqdm==4.67.1
+pip install scikit-learn==1.5.1
+pip install seaborn==0.13.2
+pip install gdown==5.2.0
+
+exit
+
+export MPI_PATH=/opt/cray/pe/mpich/8.1.27/ofi/gnu/9.1
+source distributed_interfaces/activate_custom_mpi.sh
+
+# Verify the successful creation of the local library and environment variable:
+echo $CUDAQ_MPI_COMM_LIB
+
+# Shifter into the container again and copy some files:
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:cu11-latest --module=cuda-mpich /bin/bash
+
+cp /usr/local/cuda/targets/x86_64-linux/lib/libcudart.so.11.8.89 ~/libcudart.so
+
+##############NOTE################
+make sure we are not in conda env but using image python
+
+# change -A to your account
+salloc -N 1 --gpus-per-task=1 --ntasks-per-node=4 --gpu-bind=none  -t 4:00:00 -q interactive -A nintern -C gpu --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:cu11-latest --module=cuda-mpich
+
+conda deactivate
+
+# image test
+shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:cu11-latest --module=cuda-mpich /bin/bash
+./run_single.sh reproduce.py --inference-results --model quantum --mode sequence
+
+exit
+
+# test with multiple threads
+# srun -N 1 -n 4 shifter --image=docker:nvcr.io/nvidia/nightly/cuda-quantum:cu11-latest --module=cuda-mpich bash -l run_single.sh reproduce.py --inference-results --model quantum --mode sequence

@@ -105,3 +105,15 @@ Save the above script and submit the job:
 ```sh
 sbatch quantum_transformer_example_job.sh
 ```
+### Minimal Toy Example
+
+A small dataset and script are included to help you get started quickly. Run the
+example below to train a tiny classical model and sample a few molecules:
+
+```bash
+python examples/toy_example.py
+```
+
+This uses `dataset/toy_dataset.csv` (ten molecules) and writes model checkpoints
+and sampled SMILES strings to `model_checkpoints/toy_example/` and
+`results/toy_example_samples.csv` respectively.
